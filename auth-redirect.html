@@ -1,0 +1,118 @@
+<!--
+ * @Author: woziji00226
+ * @Date: 2025-11-08 11:00:00
+ * @LastEditTime: 2025-11-08 11:00:00
+ * @LastEditors: woziji00226
+ * @Description: Supabase认证重定向处理器
+ * @FilePath: \supabase\auth-redirect.html
+ -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认证跳转中...</title>
+    <script>
+        // URL参数处理器 - 负责解析search和hash参数并进行智能重定向
+        function handleAuthRedirect() {
+            // 获取URL的search和hash部分
+            const searchParams = new URLSearchParams(window.location.search);
+            const hashContent = window.location.hash.substring(1); // 移除#号
+            const hashParams = new URLSearchParams(hashContent);
+            
+            console.log('原始URL:', window.location.href);
+            console.log('Search参数:', searchParams.toString());
+            console.log('Hash参数:', hashParams.toString());
+            
+            // 定义页面映射关系
+            const pageMap = {
+                'reset': 'reset-password.html',
+                'recovery': 'reset-password.html',
+                'verify': 'verify-email.html',
+                'email': 'verify-email.html',
+                'signup': 'verify-email.html',
+                'magiclink': 'login.html'
+            };
+            
+            // 1. 错误检测 - 检查是否包含error参数
+        const hasError = searchParams.has('error') || hashParams.has('error');
+        
+        // 2. 提取type参数（优先从search获取，其次从hash获取）
+        let type = searchParams.get('type') || hashParams.get('type');
+        
+        // 3. 确定目标页面
+        let targetPage;
+        if (hasError) {
+            // 有错误时重定向到错误页面显示错误信息
+            targetPage = 'error.html';
+            console.log('检测到错误参数，将重定向到错误页面');
+        } else {
+            // 根据type参数确定目标页面，默认跳转到登录页
+            targetPage = type && pageMap[type] ? pageMap[type] : 'login.html';
+            console.log(`检测到type=${type}，将重定向到${targetPage}`);
+        }
+            
+            // 4. 合并参数 - 将hash中的参数添加到search参数中（search参数优先级更高）
+            const mergedParams = new URLSearchParams(searchParams);
+            
+            // 添加hash中的所有参数（如果search中没有相同参数）
+            for (const [key, value] of hashParams.entries()) {
+                if (!mergedParams.has(key)) {
+                    mergedParams.set(key, value);
+                }
+            }
+            
+            // 构建最终的查询字符串
+            const finalQueryString = mergedParams.toString() ? '?' + mergedParams.toString() : '';
+            
+            // 5. 构建目标URL
+            const targetUrl = targetPage + finalQueryString;
+            
+            console.log('合并后的参数:', finalQueryString);
+            console.log('最终重定向URL:', targetUrl);
+            
+            // 延迟执行重定向以确保日志输出
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 10);
+        }
+
+        // 页面加载时执行处理
+        document.addEventListener('DOMContentLoaded', handleAuthRedirect);
+    </script>
+</head>
+
+<body>
+    <!-- 加载指示器 -->
+    <div style="
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f5f5f5;
+    ">
+        <div style="text-align: center;">
+            <!-- 加载图标 -->
+            <svg style="margin: 0 auto; animation: spin 1s linear infinite;" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            
+            <!-- 文本信息 -->
+            <h2 style="margin-top: 20px; color: #333; font-size: 18px; font-weight: 500;">正在处理认证请求...</h2>
+            <p style="margin-top: 10px; color: #666; font-size: 14px;">请稍候，正在跳转至相应页面</p>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+
+</html>

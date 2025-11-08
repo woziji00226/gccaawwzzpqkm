@@ -1,0 +1,144 @@
+<!--
+ * @Author: woziji00226
+ * @Date: 2025-11-08 09:45:00
+ * @LastEditTime: 2025-11-08 12:39:49
+ * @LastEditors: woziji00226
+ * @Description: 
+ * @FilePath: \supabase\index.html
+ * 來自woziji00226
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加载中...</title>
+    <script>
+        // 实现从hash部分提取参数并转换为URL查询参数
+
+        // 根据type参数重定向
+        function redirectBasedOnType() {
+            // 获取原始search参数和hash部分
+            const originalSearch = window.location.search;
+            const originalHash = window.location.hash;
+
+            // 定义type到页面的映射关系
+            const typeMap = {
+                'reset': 'reset-password',
+                'recovery': 'reset-password',
+                'verify': 'verify-email',
+                'email': 'verify-email',
+                'signup': 'verify-email',
+                'magiclink': 'login'
+            };
+
+            // 检查是否有错误参数（从search和hash中都需要检查）
+            let hasError = false;
+
+            // 检查search中是否有error参数
+            if (originalSearch) {
+                const searchParams = new URLSearchParams(originalSearch);
+                hasError = searchParams.has('error');
+            }
+
+            // 如果search中没有错误参数，检查hash中是否有error参数
+            if (!hasError && originalHash && originalHash.length > 1) {
+                const hashContent = originalHash.substring(1);
+                const hashParams = new URLSearchParams(hashContent);
+                hasError = hashParams.has('error');
+            }
+
+            // 解析type参数
+            let type = null;
+
+            // 首先尝试从search中获取type参数
+            if (originalSearch) {
+                const searchParams = new URLSearchParams(originalSearch);
+                if (searchParams.has('type')) {
+                    type = searchParams.get('type');
+                }
+            }
+
+            // 如果search中没有type参数，尝试从hash中获取
+            if (!type && originalHash && originalHash.length > 1) {
+                // 移除hash前面的#号
+                const hashContent = originalHash.substring(1);
+                // 解析hash内容为参数
+                const hashParams = new URLSearchParams(hashContent);
+                if (hashParams.has('type')) {
+                    type = hashParams.get('type');
+                }
+            }
+
+            // 确定目标页面
+            // 如果有错误参数，重定向到登录页面（作为错误显示页面）
+            // 否则根据type参数确定目标页面
+            let targetPage;
+            if (hasError) {
+                targetPage = 'login.html';
+                console.log('检测到错误参数，将重定向到登录页面显示错误信息');
+            } else {
+                targetPage = type && typeMap[type] ? typeMap[type] : 'login.html';
+            }
+
+            // 合并search和hash中的参数
+            const combinedParams = new URLSearchParams(originalSearch);
+
+            // 从hash中提取参数并添加到combinedParams
+            if (originalHash && originalHash.length > 1) {
+                const hashContent = originalHash.substring(1);
+                const hashParams = new URLSearchParams(hashContent);
+
+                // 添加hash中的所有参数到combinedParams
+                for (const [key, value] of hashParams.entries()) {
+                    // 只有当search中没有相同参数时才添加
+                    if (!combinedParams.has(key)) {
+                        combinedParams.set(key, value);
+                    }
+                }
+            }
+
+            // 构建最终的查询参数字符串
+            const finalSearchParams = combinedParams.toString() ? '?' + combinedParams.toString() : '';
+
+            console.log('原始URL:', window.location.href);
+            console.log('原始Search:', originalSearch);
+            console.log('原始Hash:', originalHash);
+            console.log('检测到的Type:', type);
+            console.log('目标页面:', targetPage);
+            console.log('合并后的参数:', finalSearchParams);
+            debugger;
+            //return;
+            // 使用setTimeout确保所有日志输出后再执行重定向
+            // 构建目标URL - 包含合并后的参数
+            const targetUrl = targetPage + finalSearchParams;
+
+            console.log('最终重定向URL:', targetUrl);
+            window.location.href = targetUrl;
+        }
+
+        // 页面加载时执行重定向
+        document.addEventListener('DOMContentLoaded', redirectBasedOnType);
+    </script>
+</head>
+
+<body>
+    <!-- 简单的加载指示器 -->
+    <div
+        style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div>
+            <div style="text-align: center;">
+                <svg style="margin: 0 auto;" xmlns="http://www.w3.org/2000/svg" width="40" height="40"
+                    viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <p style="margin-top: 16px; color: #666;">正在跳转，请稍候...</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

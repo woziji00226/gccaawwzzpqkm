@@ -1,0 +1,224 @@
+<!--
+ * @Author: woziji00226
+ * @Date: 2025-11-08 11:15:00
+ * @LastEditTime: 2025-11-08 11:15:00
+ * @LastEditors: woziji00226
+ * @Description: 错误页面 - 显示认证相关错误信息
+ * @FilePath: \supabase\error.html
+ -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认证错误 - 请重试</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        /* 错误容器 */
+        .error-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        /* 错误图标 */
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fee2e2;
+            border-radius: 50%;
+        }
+        
+        .error-icon svg {
+            width: 50px;
+            height: 50px;
+            fill: #dc2626;
+        }
+        
+        /* 错误标题 */
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 16px;
+        }
+        
+        /* 错误信息 */
+        .error-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        /* 错误详情 */
+        .error-details {
+            background-color: #f9fafb;
+            border-left: 4px solid #dc2626;
+            padding: 16px;
+            margin: 24px 0;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #4b5563;
+            border-radius: 4px;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 32px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+            transform: translateY(-1px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 30px 20px;
+            }
+            
+            .error-icon {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .error-icon svg {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .error-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+    <script>
+        // 页面加载时获取并显示错误信息
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从URL参数中获取错误信息
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // 获取错误相关参数
+            const error = urlParams.get('error') || 'unknown_error';
+            const errorCode = urlParams.get('error_code') || 'UNKNOWN';
+            let errorDescription = urlParams.get('error_description');
+            
+            // 如果没有提供错误描述，使用默认描述
+            if (!errorDescription) {
+                // 根据错误类型提供一些常见的错误描述
+                const errorDescriptions = {
+                    'access_denied': '您没有权限执行此操作',
+                    'invalid_request': '请求参数无效',
+                    'invalid_grant': '授权无效，请重试',
+                    'invalid_token': '令牌无效或已过期',
+                    'expired_token': '令牌已过期，请重新登录',
+                    'unknown_error': '发生未知错误，请稍后再试'
+                };
+                
+                errorDescription = errorDescriptions[error] || '发生错误，请稍后再试';
+            } else {
+                // 解码URL编码的描述文本
+                errorDescription = decodeURIComponent(errorDescription);
+            }
+            
+            // 更新页面上的错误信息
+            document.getElementById('error-title').textContent = '发生错误';
+            document.getElementById('error-message').textContent = errorDescription;
+            document.getElementById('error-details').textContent = 
+                `错误类型: ${error}\n错误代码: ${errorCode}`;
+            
+            // 记录错误信息到控制台（用于调试）
+            console.error('认证错误:', {
+                error: error,
+                error_code: errorCode,
+                error_description: errorDescription
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="error-container">
+        <!-- 错误图标 -->
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+        </div>
+        
+        <!-- 错误标题和消息 -->
+        <h1 id="error-title" class="error-title">发生错误</h1>
+        <p id="error-message" class="error-message">正在加载错误信息...</p>
+        
+        <!-- 错误详情 (开发调试用) -->
+        <div id="error-details" class="error-details">错误详情将在这里显示...</div>
+        
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <a href="login.html" class="btn btn-primary">返回登录页</a>
+            <a href="index.html" class="btn btn-secondary">返回首页</a>
+        </div>
+    </div>
+</body>
+
+</html>
